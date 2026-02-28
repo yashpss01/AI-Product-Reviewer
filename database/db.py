@@ -15,16 +15,14 @@ def setup_database():
     c = conn.cursor()
     
     # reviews table
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS reviews (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            review_id TEXT UNIQUE,
-            product_category TEXT,
-            review_text TEXT,
-            rating INTEGER,
-            date_added TEXT
-        )
-    ''')
+    c.execute('''CREATE TABLE IF NOT EXISTS reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        review_id TEXT UNIQUE,
+        product_category TEXT,
+        review_text TEXT,
+        rating INTEGER,
+        date_added TEXT
+    )''')
     
     # authentication
     c.execute('''
@@ -54,24 +52,21 @@ def setup_database():
     print("Database tables ensured.")
 
 def load_csv_to_db(csv_path):
-    """
-    Loads data from a cleaned CSV file into the SQLite database.
-    Expects columns: review_id, product_category, review_text, rating, date_added
-    """
+    # load pandas df into sqlite database
+    # requires columns: review_id, product_category, review_text, rating, date_added
     print(f"Loading data from {csv_path}...")
     try:
-        df = pd.read_csv(csv_path)
+        data = pd.read_csv(csv_path)
         
         conn = get_connection()
-        # pandas to_sql is an easy way to load a dataframe to a sqlite table
-        # if_exists='append' will add to existing data
-        # We drop the dataframe index so it doesn't create an 'index' column in SQLite
-        df.to_sql('reviews', conn, if_exists='append', index=False)
+        # pandas to_sql makes this way easier
+        data.to_sql('reviews', conn, if_exists='append', index=False)
         conn.close()
         
-        print(f"Successfully loaded {len(df)} records into the database.")
+        # print("debug: loaded dataset")
+        print(f"successfully loaded {len(data)} records to db.")
     except Exception as e:
-        print(f"Error loading CSV to database: {e}")
+        print(f"failed to load csv: {e}")
 
 if __name__ == "__main__":
     # If this file is run directly, setup the db and optionally load data

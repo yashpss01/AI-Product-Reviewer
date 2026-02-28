@@ -43,6 +43,7 @@ def login_page():
             if user:
                 st.session_state.logged_in = True
                 st.session_state.user = user
+                # print(f"login ok for {username}")
                 st.success("Login successful!")
                 st.rerun()
             else:
@@ -56,7 +57,7 @@ def logout():
     st.rerun()
 
 # dashboard view
-def render_dashboard():
+def show_dashboard():
     user = st.session_state.user
     role = user['role']
     
@@ -130,7 +131,7 @@ def render_dashboard():
             st.dataframe(worst_df, hide_index=True, use_container_width=True)
 
 # report generation page
-def render_reports_page():
+def show_reports():
     user = st.session_state.user
     st.title("Traceability & Reports")
     
@@ -164,40 +165,40 @@ def render_reports_page():
         except (ValueError, TypeError):
             limit = 5
             
-        result_data = None
+        res = None
         
         if action == "calculate_nps":
-            result_data = {"type": "nps", "data": calculate_nps(effective_category)}
+            res = {"type": "nps", "data": calculate_nps(effective_category)}
             st.success(f"NPS Calculated for {effective_category or 'All Categories'}!")
-            st.json(result_data["data"])
+            st.json(res["data"])
             
         elif action == "satisfaction_distribution":
-            result_data = {"type": "satisfaction", "data": get_satisfaction_distribution(effective_category)}
+            res = {"type": "satisfaction", "data": get_satisfaction_distribution(effective_category)}
             st.success(f"Satisfaction Distribution for {effective_category or 'All Categories'}!")
-            st.json(result_data["data"])
+            st.json(res["data"])
             
         elif action == "top_products":
             if role_cat_limit:
                  st.error(f"Cannot run global ranking queries. You are restricted to {role_cat_limit}.")
             else:
-                 result_data = {"type": "top_products", "data": get_top_products(limit=limit)}
+                 res = {"type": "top_products", "data": get_top_products(limit=limit)}
                  st.success(f"Top {limit} Products Found!")
-                 st.dataframe(result_data["data"])
+                 st.dataframe(res["data"])
                  
         elif action == "worst_products":
              if role_cat_limit:
                  st.error(f"Cannot run global ranking queries. You are restricted to {role_cat_limit}.")
              else:
-                 result_data = {"type": "worst_products", "data": get_worst_products(limit=limit)}
+                 res = {"type": "worst_products", "data": get_worst_products(limit=limit)}
                  st.success(f"Worst {limit} Products Found!")
-                 st.dataframe(result_data["data"])
+                 st.dataframe(res["data"])
                  
         elif action == "complaint_summary":
             with st.spinner("Generating AI Summary by analyzing negative reviews..."):
                 summary_text = summarize_negative_reviews(effective_category)
-                result_data = {"type": "ai_summary", "data": summary_text}
+                res = {"type": "ai_summary", "data": summary_text}
                 st.success(f"AI Summary Generated for {effective_category or 'All Categories'}!")
-                val = result_data["data"]
+                val = res["data"]
                 if "Unable" in val or "No negative" in val:
                     st.warning(val)
                 else:
@@ -207,8 +208,8 @@ def render_reports_page():
             st.warning("Query intent not recognized. I only know about NPS, satisfaction, top/worst products, and complaint summaries.")
             
         # save report to db
-        if result_data:
-            save_report(user['id'], query, result_data)
+        if res:
+            save_report(user['id'], query, res)
             st.info("Report saved to history.")
             
     st.markdown("---")
@@ -235,9 +236,9 @@ def main():
         page = st.sidebar.radio("Go to:", ["Dashboard", "Reports View"])
         
         if page == "Dashboard":
-            render_dashboard()
+            show_dashboard()
         else:
-            render_reports_page()
+            show_reports()
 
 if __name__ == "__main__":
     main()

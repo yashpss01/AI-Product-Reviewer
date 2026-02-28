@@ -48,24 +48,25 @@ JSON Format:
         
         user_prompt = f"Classify this query: '{query}'"
         
-        response = client.chat.completions.create(
+        # send prompt
+        res = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.0,
-            response_format={"type": "json_object"} # Forces strict JSON output
+            response_format={"type": "json_object"} # force strict json
         )
         
-        result_text = response.choices[0].message.content.strip()
-        parsed_json = json.loads(result_text)
+        raw_text = res.choices[0].message.content.strip()
+        parsed = json.loads(raw_text)
         
-        # Ensure 'action' key exists
-        if "action" not in parsed_json:
-            parsed_json["action"] = "unknown"
+        # fallback action if it missed it
+        if "action" not in parsed:
+            parsed["action"] = "unknown"
             
-        return parsed_json
+        return parsed
         
     except Exception as e:
         print(f"router error: {e}")

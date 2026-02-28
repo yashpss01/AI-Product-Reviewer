@@ -7,58 +7,58 @@ from database.db import setup_database
 from services.auth import create_user, authenticate_user, get_user_accessible_category
 
 def test_auth():
-    print("--- Testing Phase 3 Auth Logic ---\n")
+    print("--- testing phase 3 auth ---\n")
     
-    # Ensure tables exist
+    # make sure tables are there
     setup_database()
     
-    print("\n1. Seeding Admin User...")
+    print("\n1. seeding admin user...")
     admin_created = create_user("admin_user", "adminpass", "admin")
     if admin_created:
-        print(" -> Admin created successfully.")
+        print(" -> admin created ok.")
     else:
-        print(" -> Admin already exists (or failed).")
+        print(" -> admin already exists.")
         
-    print("\n2. Seeding Analyst User...")
+    print("\n2. seeding analyst user...")
     analyst_created = create_user("analyst_electronics", "analystpass", "analyst", "Electronics")
     if analyst_created:
-        print(" -> Analyst created successfully.")
+        print(" -> analyst created ok.")
     else:
-        print(" -> Analyst already exists (or failed).")
+        print(" -> analyst already exists.")
         
-    print("\n3. Testing Duplicate User Creation...")
+    print("\n3. testing duplicates...")
     dup_created = create_user("admin_user", "newpass123", "admin")
     if not dup_created:
-        print(" -> SUCCESS: Duplicate username prevented properly.")
+        print(" -> good: duplicate prevented.")
     else:
-        print(" -> FAIL: Duplicate username was allowed!")
+        print(" -> BAD: duplicate allowed!")
         
-    print("\n4. Testing Login Success...")
+    print("\n4. testing login ok...")
     admin_auth = authenticate_user("admin_user", "adminpass")
     if admin_auth:
-        print(f" -> SUCCESS: Admin logged in! User data: {admin_auth}")
+        print(f" -> admin login worked! data: {admin_auth}")
     else:
-        print(" -> FAIL: Admin login failed.")
+        print(" -> admin login failed.")
         
     analyst_auth = authenticate_user("analyst_electronics", "analystpass")
     if analyst_auth:
-        print(f" -> SUCCESS: Analyst logged in! User data: {analyst_auth}")
+        print(f" -> analyst login worked! data: {analyst_auth}")
     else:
-        print(" -> FAIL: Analyst login failed.")
+        print(" -> analyst login failed.")
         
-    print("\n5. Testing Login Failure (wrong password)...")
+    print("\n5. testing login fail (bad pass)...")
     bad_auth = authenticate_user("admin_user", "wrongpassword")
     if not bad_auth:
-        print(" -> SUCCESS: Wrong password rejected.")
+        print(" -> good: bad pass rejected.")
     else:
-        print(" -> FAIL: Wrong password was accepted!")
+        print(" -> BAD: bad pass accepted!")
         
-    print("\n6. Testing Role Accessibility...")
+    print("\n6. testing role accessibility...")
     admin_cat = get_user_accessible_category(admin_auth)
-    print(f" -> Admin category limit: {admin_cat} (Expect None)")
+    print(f" -> admin category limit: {admin_cat} (should be None)")
     
     analyst_cat = get_user_accessible_category(analyst_auth)
-    print(f" -> Analyst category limit: {analyst_cat} (Expect 'Electronics')")
+    print(f" -> analyst category limit: {analyst_cat} (should be 'Electronics')")
 
 if __name__ == "__main__":
     test_auth()

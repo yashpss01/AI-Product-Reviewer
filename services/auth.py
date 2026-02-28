@@ -28,14 +28,15 @@ def create_user(username, password, role, assigned_category=None):
         conn.close()
         return False
         
-    hashed_pwd = hash_password(password)
+    h_pwd = hash_password(password)
     
     try:
-        c.execute(
-            "INSERT INTO users (username, password_hash, role, assigned_category) VALUES (?, ?, ?, ?)",
-            (username, hashed_pwd, role, assigned_category)
-        )
+        c.execute("""INSERT INTO users 
+            (username, password_hash, role, assigned_category) 
+            VALUES (?, ?, ?, ?)""",
+            (username, h_pwd, role, assigned_category))
         conn.commit()
+        # print("created user ok")
         success = True
     except sqlite3.IntegrityError:
         success = False # just in case
@@ -50,14 +51,14 @@ def authenticate_user(username, password):
     c = conn.cursor()
     
     c.execute("SELECT * FROM users WHERE username = ?", (username,))
-    user_row = c.fetchone()
+    row = c.fetchone()
     conn.close()
     
-    if not user_row:
+    if not row:
         return None
         
-    if check_password(password, user_row['password_hash']):
-        return dict(user_row) # convert row to dictionary
+    if check_password(password, row['password_hash']):
+        return dict(row) # convert row to dictionary
         
     return None
 

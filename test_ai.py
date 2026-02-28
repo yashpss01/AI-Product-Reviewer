@@ -6,20 +6,20 @@ from services.ai_summary import summarize_negative_reviews
 path.append(os.path.dirname(__file__))
 
 def test_ai_layer():
-    print("--- Testing Phase 5 AI Summarization ---\n")
+    print("--- testing phase 5 ai summary ---\n")
     
-    # 1. Admin Level
-    print("1. Testing AI Summary for Admin (All Categories)")
-    admin_summary = summarize_negative_reviews(category=None)
-    print("Admin Summary Output:\n")
-    print(admin_summary)
+    # 1. admin level
+    print("1. summary for admin (all categories)")
+    admin_sum = summarize_negative_reviews(category=None)
+    print("admin output:\n")
+    print(admin_sum)
     print("\n" + "-"*50 + "\n")
     
-    # 2. Analyst Level
-    print("2. Testing AI Summary for Analyst (Electronics only)")
-    analyst_summary = summarize_negative_reviews(category="Electronics")
-    print("Analyst (Electronics) Summary Output:\n")
-    print(analyst_summary)
+    # 2. analyst level
+    print("2. summary for analyst (electronics)")
+    analyst_sum = summarize_negative_reviews(category="Electronics")
+    print("analyst output:\n")
+    print(analyst_sum)
     print("\n" + "-"*50 + "\n")
     
 if __name__ == "__main__":

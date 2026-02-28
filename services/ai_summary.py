@@ -55,25 +55,25 @@ def summarize_negative_reviews(category=None):
         conn.close()
         combined_text = "\n".join(reviews_text)
         
-        # Initialize OpenAI Client
+        # init openai client
         client = OpenAI(api_key=api_key)
         
         system_prompt = "You are an analytics assistant summarizing customer complaints."
         user_prompt = f"Here are negative customer reviews. Identify top recurring issues in bullet points. Keep it concise.\n\nReviews:\n{combined_text}"
         
-        # Call OpenAI API securely
-        response = client.chat.completions.create(
+        # call openai endpoint
+        res = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.3, # Low temperature for more factual, consistent summarization
-            max_tokens=250   # Keep the summary concise
+            temperature=0.3, # low temp so it doesn't hallucinate
+            max_tokens=250   # keep the summary short
         )
         
-        summary = response.choices[0].message.content.strip()
-        return summary
+        sum_text = res.choices[0].message.content.strip()
+        return sum_text
         
     except Exception as e:
         # fallback if any error happens (like rate limits)

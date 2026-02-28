@@ -7,18 +7,16 @@ path.append(os.path.dirname(__file__))
 
 from database.db import get_connection
 
-def save_report(user_id, query_text, result_data):
+def save_report(user_id, query_text, res):
     # save query history to db so we can trace it later
     conn = get_connection()
     c = conn.cursor()
     
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    summary_str = json.dumps(result_data)
+    s_str = json.dumps(res)
     
-    c.execute("""
-        INSERT INTO reports (user_id, query_text, result_summary, timestamp)
-        VALUES (?, ?, ?, ?)
-    """, (user_id, query_text, summary_str, timestamp))
+    c.execute("INSERT INTO reports (user_id, query_text, result_summary, timestamp) VALUES (?, ?, ?, ?)", 
+        (user_id, query_text, s_str, timestamp))
     
     conn.commit()
     conn.close()

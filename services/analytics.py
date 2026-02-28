@@ -7,17 +7,10 @@ path.append(os.path.join(os.path.dirname(__file__), '..'))
 from database.db import get_connection
 
 def calculate_nps(category=None):
-    """
-    Calculates the Net Promoter Score (NPS) based on ratings.
-    Promoters: 5
-    Passives: 4
-    Detractors: 1, 2, 3
-    
-    Returns a dictionary with raw counts and the final NPS score.
-    NPS = (% Promoters - % Detractors) * 100
-    """
+    # figure out the net promoter score
+    # promoters = 5, passives = 4, detractors = 1-3
     conn = get_connection()
-    cursor = conn.cursor()
+    c = conn.cursor()
     
     query = "SELECT rating, COUNT(*) as count FROM reviews"
     params = []
@@ -28,50 +21,45 @@ def calculate_nps(category=None):
         
     query += " GROUP BY rating"
     
-    cursor.execute(query, params)
-    rows = cursor.fetchall()
+    c.execute(query, params)
+    rows = c.fetchall()
     conn.close()
     
-    promoters = 0
-    passives = 0
-    detractors = 0
+    p_count = 0
+    pas_count = 0
+    det_count = 0
     
     for row in rows:
         rating = row['rating']
         count = row['count']
         
         if rating == 5:
-            promoters += count
+            p_count += count
         elif rating == 4:
-            passives += count
+            pas_count += count
         elif rating <= 3:
-            detractors += count
+            det_count += count
             
-    total = promoters + passives + detractors
+    tot = p_count + pas_count + det_count
     
-    nps_score = 0
-    if total > 0:
-        pct_promoters = promoters / total
-        pct_detractors = detractors / total
-        nps_score = round((pct_promoters - pct_detractors) * 100, 2)
+    final_nps = 0
+    if tot > 0:
+        pct_promoters = p_count / tot
+        pct_detractors = det_count / tot
+        final_nps = round((pct_promoters - pct_detractors) * 100, 2)
         
     return {
-        "nps": nps_score,
-        "promoters": promoters,
-        "passives": passives,
-        "detractors": detractors,
-        "total": total
+        "nps": final_nps,
+        "promoters": p_count,
+        "passives": pas_count,
+        "detractors": det_count,
+        "total": tot
     }
 
 def get_satisfaction_distribution(category=None):
-    """
-    Returns counts of reviews categorized by satisfaction level:
-    Happy: 4, 5
-    Neutral: 3
-    Unhappy: 1, 2
-    """
+    # group reviews by happy/neutral/unhappy
     conn = get_connection()
-    cursor = conn.cursor()
+    c = conn.cursor()
     
     query = "SELECT rating, COUNT(*) as count FROM reviews"
     params = []
@@ -82,8 +70,8 @@ def get_satisfaction_distribution(category=None):
         
     query += " GROUP BY rating"
     
-    cursor.execute(query, params)
-    rows = cursor.fetchall()
+    c.execute(query, params)
+    rows = c.fetchall()
     conn.close()
     
     happy = 0
@@ -108,29 +96,22 @@ def get_satisfaction_distribution(category=None):
     }
 
 def get_product_rankings(limit=5, min_reviews=10, best=True):
-    """
-    Helper function to get top or worst products based on average rating.
-    Only considers products with at least `min_reviews`.
-    """
+    # rank products based on average rating
     conn = get_connection()
-    cursor = conn.cursor()
+    c = conn.cursor()
     
-    order_direction = "DESC" if best else "ASC"
+    sort_dir = "DESC" if best else "ASC"
     
-    query = f"""
-        SELECT 
-            product_category,
-            COUNT(*) as review_count,
-            AVG(rating) as avg_rating
-        FROM reviews
-        GROUP BY product_category
-        HAVING review_count >= ?
-        ORDER BY avg_rating {order_direction}, review_count DESC
-        LIMIT ?
-    """
+    query = f"""SELECT product_category, COUNT(*) as review_count, AVG(rating) as avg_rating
+FROM reviews
+GROUP BY product_category
+HAVING review_count >= ?
+ORDER BY avg_rating {sort_dir}, review_count DESC
+LIMIT ?"""
     
-    cursor.execute(query, (min_reviews, limit))
-    rows = cursor.fetchall()
+    # print(f"running rank query limit {limit}")
+    c.execute(query, (min_reviews, limit))
+    rows = c.fetchall()
     conn.close()
     
     results = []
@@ -144,18 +125,16 @@ def get_product_rankings(limit=5, min_reviews=10, best=True):
     return results
 
 def get_top_products(limit=5, min_reviews=10):
-    """Returns the top `limit` products with at least `min_reviews` reviews."""
     return get_product_rankings(limit, min_reviews, best=True)
 
 def get_worst_products(limit=5, min_reviews=10):
-    """Returns the worst `limit` products with at least `min_reviews` reviews."""
     return get_product_rankings(limit, min_reviews, best=False)
 
 def get_all_categories():
-    """Returns a list of all distinct product categories."""
+    # grab all unique product categories
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT product_category FROM reviews WHERE product_category IS NOT NULL ORDER BY product_category")
-    rows = cursor.fetchall()
+    c = conn.cursor()
+    c.execute("SELECT DISTINCT product_category FROM reviews WHERE product_category IS NOT NULL ORDER BY product_category")
+    rows = c.fetchall()
     conn.close()
     return [row['product_category'] for row in rows]
