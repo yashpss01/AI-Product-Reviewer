@@ -1,0 +1,69 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{\textbf{AI-Powered Product Review Analytics System}}
+\author{Yash Pratap Singh Solanki}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report details the development of an AI-Powered Product Review Analytics System. The system ingests and processes Amazon product reviews, stores them in a relational database, and provides an interactive dashboard for users to extract insights. Key features include role-based access control (RBAC), statistical analytics like Net Promoter Score (NPS), and integration with Large Language Models (LLMs) for natural language querying and automated summarization of negative feedback.
+\end{abstract}
+
+\section{Introduction}
+Analyzing customer feedback is crucial for understanding product performance and user satisfaction. The objective of this project was to build a comprehensive analytics platform capable of processing a large dataset of Amazon reviews and presenting actionable insights through a user-friendly interface. The system aims to bridge the gap between raw data and business intelligence by combining traditional statistical metrics with modern AI capabilities.
+
+\section{Methodology}
+The development of the system followed a modular approach, broken down into several key phases:
+
+\subsection{Data Processing and Storage}
+A dataset comprising approximately 20,000 Amazon product reviews was utilized. A data pipeline was constructed using the \texttt{pandas} library to clean the raw data, extract relevant columns (e.g., product IDs, review text, ratings), and map products to conceptual categories (e.g., Electronics, Books). The cleaned data was then securely ingested into an SQLite relational database (\texttt{reviews.db}).
+
+\subsection{Authentication and Security}
+Security was prioritized by implementing a robust authentication module. User passwords are cryptographically hashed using the \texttt{bcrypt} library before being stored in the database. Furthermore, a Role-Based Access Control (RBAC) mechanism was introduced, defining two primary roles:
+\begin{itemize}
+    \item \textbf{Admin:} Has unrestricted access to all data categories and historical system queries.
+    \item \textbf{Analyst:} Is restricted to viewing data specific to their assigned product category.
+\end{itemize}
+All database interactions were parameterized to mitigate SQL injection vulnerabilities.
+
+\subsection{Analytical Engine}
+The core logic engine was designed to compute key performance indicators:
+\begin{itemize}
+    \item \textbf{Net Promoter Score (NPS):} Calculated by subtracting the percentage of detractors (ratings 1-3) from promoters (rating 5).
+    \item \textbf{Satisfaction Distribution:} Categorizing reviews into Happy, Neutral, and Unhappy segments.
+    \item \textbf{Product Rankings:} Identifying the top and worst-performing products based on average ratings, ensuring a minimum review threshold for statistical significance.
+\end{itemize}
+
+\subsection{Dashboard Interface}
+The frontend was developed using \texttt{Streamlit}, providing a highly interactive, web-based dashboard. It visualizes the computed metrics using \texttt{plotly} charts and enforces the RBAC rules seamlessly in the UI, ensuring analysts only see data within their purview.
+
+\section{AI Integration}
+To enhance the user experience and depth of insight, OpenAI's GPT models were integrated into the architecture.
+
+\subsection{LLM-Driven Query Routing}
+Initially, the system relied on strict keyword matching to interpret user questions (e.g., "What is the NPS?"). This was replaced with an AI Router. The LLM acts as an intent classifier, taking natural language input and outputting a structured JSON payload that dictates which backend function to execute. A fallback keyword parser ensures system resilience if the external API fails (e.g., due to quota limits).
+
+\subsection{Automated Review Summarization}
+A dedicated AI summarization service was built to analyze unhappy customers. By querying the database for the most critical reviews (ratings $\le 2$) within a specific category, the text is aggregated and sent to the LLM. The AI then synthesizes a concise, bulleted summary of the core recurring complaints, saving analysts from manually reading hundreds of negative reviews.
+
+\section{Findings and Results}
+The implementation resulted in a highly functional prototype that successfully met all objectives.
+\begin{enumerate}
+    \item \textbf{Performance:} The SQLite database handles the 20,000-row dataset efficiently, with negligible latency during analytical queries.
+    \item \textbf{Security Integration:} The RBAC system successfully overrides both UI selections and LLM-parsed intents, ensuring analysts cannot bypass their category restrictions.
+    \item \textbf{AI Reliability:} The LLM consistently formats intent classifications correctly. The fallback mechanism proved critical during development when API quotas were reached, maintaining the application's testability.
+\end{enumerate}
+
+\section{Conclusion}
+The AI-Powered Product Review Analytics System demonstrates the effective combining of traditional data engineering, secure web application development, and modern generative AI. By structuring the architecture modularly, the system remains maintainable and extensible. Future work could involve migrating to a more robust database system like PostgreSQL and expanding the dataset utilizing distributed computing frameworks.
+
+\end{document}
