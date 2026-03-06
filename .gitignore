@@ -1,7 +1,6 @@
 .env
 __pycache__/
 *.pyc
-*.db
 
 # Dataset files are too large for GitHub
 data/*.csv
