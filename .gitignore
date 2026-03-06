@@ -5,3 +5,4 @@ __pycache__/
 
 # Dataset files are too large for GitHub
 data/*.csv
+!data/cleaned_reviews.csv

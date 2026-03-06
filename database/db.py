@@ -48,7 +48,34 @@ def setup_database():
     ''')
     
     conn.commit()
+    
+    # Check if we need to initialize default demo users
+    c.execute("SELECT COUNT(*) FROM users")
+    if c.fetchone()[0] == 0:
+        import bcrypt
+        print("Initializing default demo users...")
+        salt = bcrypt.gensalt()
+        admin_hash = bcrypt.hashpw('adminpass'.encode('utf-8'), salt).decode('utf-8')
+        c.execute("INSERT INTO users (username, password_hash, role, assigned_category) VALUES (?, ?, ?, ?)", 
+                  ('admin_user', admin_hash, 'admin', None))
+                  
+        analyst_hash = bcrypt.hashpw('analystpass'.encode('utf-8'), salt).decode('utf-8')
+        c.execute("INSERT INTO users (username, password_hash, role, assigned_category) VALUES (?, ?, ?, ?)", 
+                  ('analyst_electronics', analyst_hash, 'analyst', 'Electronics'))
+        conn.commit()
+        
+    # Check if we need to auto-load dataset
+    c.execute("SELECT COUNT(*) FROM reviews")
+    is_reviews_empty = c.fetchone()[0] == 0
+    
     conn.close()
+    
+    if is_reviews_empty:
+        csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'cleaned_reviews.csv')
+        if os.path.exists(csv_path):
+            print("Auto-loading reviews dataset...")
+            load_csv_to_db(csv_path)
+
     print("Database tables ensured.")
 
 def load_csv_to_db(csv_path):
