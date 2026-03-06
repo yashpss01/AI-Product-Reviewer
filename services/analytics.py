@@ -1,11 +1,13 @@
 import os
 from sys import path
+import streamlit as st
 
 # Add root directory to path so we can import database
 path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from database.db import get_connection
 
+@st.cache_data(ttl=3600)
 def calculate_nps(category=None):
     # figure out the net promoter score
     # promoters = 5, passives = 4, detractors = 1-3
@@ -56,6 +58,7 @@ def calculate_nps(category=None):
         "total": tot
     }
 
+@st.cache_data(ttl=3600)
 def get_satisfaction_distribution(category=None):
     # group reviews by happy/neutral/unhappy
     conn = get_connection()
@@ -95,6 +98,7 @@ def get_satisfaction_distribution(category=None):
         "Unhappy": unhappy
     }
 
+@st.cache_data(ttl=3600)
 def get_product_rankings(limit=5, min_reviews=10, best=True):
     # rank products based on average rating
     conn = get_connection()
@@ -130,6 +134,7 @@ def get_top_products(limit=5, min_reviews=10):
 def get_worst_products(limit=5, min_reviews=10):
     return get_product_rankings(limit, min_reviews, best=False)
 
+@st.cache_data(ttl=3600)
 def get_all_categories():
     # grab all unique product categories
     conn = get_connection()

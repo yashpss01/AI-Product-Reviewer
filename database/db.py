@@ -79,19 +79,20 @@ def setup_database():
     print("Database tables ensured.")
 
 def load_csv_to_db(csv_path):
-    # load pandas df into sqlite database
-    # requires columns: review_id, product_category, review_text, rating, date_added
-    print(f"Loading data from {csv_path}...")
+    # load pandas df into sqlite database in chunks to save memory
+    print(f"Loading data from {csv_path} in chunks...")
     try:
-        data = pd.read_csv(csv_path)
-        
         conn = get_connection()
-        # pandas to_sql makes this way easier
-        data.to_sql('reviews', conn, if_exists='append', index=False)
-        conn.close()
+        chunk_size = 50000 # Read 50k rows at a time
+        loaded_count = 0
         
-        # print("debug: loaded dataset")
-        print(f"successfully loaded {len(data)} records to db.")
+        for chunk in pd.read_csv(csv_path, chunksize=chunk_size):
+            chunk.to_sql('reviews', conn, if_exists='append', index=False)
+            loaded_count += len(chunk)
+            print(f"Loaded {loaded_count} records so far...")
+            
+        conn.close()
+        print(f"successfully loaded {loaded_count} records to db.")
     except Exception as e:
         print(f"failed to load csv: {e}")
 

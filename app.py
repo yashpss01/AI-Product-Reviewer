@@ -26,7 +26,11 @@ def init_session():
     if 'user' not in st.session_state:
         st.session_state.user = None
 
-setup_database()
+@st.cache_resource
+def init_db():
+    setup_database()
+
+init_db()
 init_session()
 
 # login screen
