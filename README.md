@@ -1,5 +1,7 @@
 # AI-Powered Review Analytics System
 
+### Hosted Link : https://ai-appuct-reviewer-r74t7xtrxxktgfhhvrte7w.streamlit.app/
+
 ## Problem Statement
 Analyzing large volumes of product reviews manually is time-consuming and inefficient. Businesses need a structured way to quantify customer satisfaction, identify the best and worst-performing products, and securely restrict data access based on user roles (Admin vs. Analyst). This system provides an automated, SQL-backed analytics dashboard to track Net Promoter Score (NPS), sentiment distribution, and product rankings without relying on complex, over-engineered architectures.
 
